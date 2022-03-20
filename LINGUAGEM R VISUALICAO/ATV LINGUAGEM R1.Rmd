@@ -1,0 +1,135 @@
+---
+title: "ATV LINGUAGEM R1"
+output: html_document
+date: '2022-03-12'
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+DATASET RETIRADO DO SITE 
+https://dados.gov.br/dataset/serie-historica-de-precos-de-combustiveis-por-revenda
+
+
+```{r}
+library(readr)
+GLP <- read_csv2("GLP.csv")
+GLP
+```
+
+
+```{r}
+library(readr)
+GLP <- read_csv2("GLP.csv",
+                col_types = "ccccc____ccDd_cc")
+GLP
+```
+```{r}
+# LEITURA DOS DADOS COM DATA
+```
+
+
+```{r}
+# GLP <- read_csv2("GLP.csv",
+#     col_types = cols('Nome da Rua' = col_skip(),
+#                      'Numero Rua' = col_skip(),
+#                      'Complemento' = col_skip(),
+#                      'Bairro' = col_skip(),
+#                      'Valor de Compra' = col_skip(),
+# 
+#                      'Data da Coleta' = col_date(format = "%d/%m/%Y")))
+# GLP
+```
+
+
+```{r}
+ GLP <- read_csv2("GLP.csv",
+     col_types = cols(SNo = col_skip(),
+
+                     'Data da Coleta' = col_date(format = "%d/%m/%Y")))
+GLP
+
+```
+
+```{r dplyr-select}
+library(dplyr)
+GLP_clean <- GLP %>% 
+  select(Regiao = 'Regiao - Sigla',
+         Estado = 'Estado - Sigla',
+         Municipio,
+         Revenda,
+         CNPJ = 'CNPJ da Revenda',
+         Cep,
+         Produto,
+         Coleta = 'Data da Coleta',
+         Valor = 'Valor de Venda',
+         Unidade = 'Unidade de Medida',
+         Bandeira)
+GLP_clean
+```
+
+# MANIPULAÇÃO DOS DADOS.
+
+# MEDIA DE PREÇO POR ESTABELECIMENTO DE REVENDA DE GLP NO MÊS DE DEZEMBRO.
+```{r}
+group_by(GLP_clean,CNPJ)%>%summarise(Total=mean(Valor))
+```
+# MEDIA DE PREÇO POR REGIÃO E ESTADO DE GLP NO MÊS DE DEZEMBRO.
+```{r}
+
+group_by(GLP_clean,Regiao,Estado)%>%summarise(Total=mean(Valor))
+
+```
+# ORDENANDO O MAIOR VALOR DE VENDA DE GLP
+```{r}
+GLP_clean %>% 
+  arrange(Regiao,Estado,Municipio,-Valor,Bandeira) %>% 
+  select(Regiao,Estado,Municipio,Valor, Bandeira)
+```
+
+# FILTRANDO APENAS O PRODUTO GLP
+
+```{r}
+filter(GLP_clean, Produto == "GLP")
+```
+
+```{r}
+#Municipio com o MENOR preço medio de glp
+
+valor_municipio <- group_by(GLP_clean,Municipio, Estado)%>%summarise(Total=mean(Valor))
+
+valor_municipio %>% arrange(Total)
+```
+```{r}
+
+#Municipio com o MAIOR  preço medio de glp
+preco_municipio <- group_by(GLP_clean,Municipio, Estado)%>%summarise(Total=mean(Valor))
+
+preco_municipio %>% arrange(desc(Total))
+```
+```{r}
+#ESTADO com o MAIOR  preço medio de glp
+preco_estado <- group_by(GLP_clean, Estado)%>%summarise(Total=mean(Valor))
+
+preco_estado %>% arrange(desc(Total))
+```
+```{r}
+#ESTADO com o MENOR  preço medio de glp
+preco_estado <- group_by(GLP_clean, Estado)%>%summarise(Total=mean(Valor))
+
+preco_estado %>% arrange(Total)
+```
+
+```{r}
+#região com o MAIOR  preço medio de glp
+preco_regiao <- group_by(GLP_clean, Regiao)%>%summarise(Total=mean(Valor))
+
+preco_regiao %>% arrange(desc(Total))
+```
+
+
+#############################################################################
+ OS PLOTS ESTÃO NO ARQUIVO VISUALIZACAO.R
+#############################################################################
+
+
